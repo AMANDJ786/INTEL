@@ -1,8 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { BarChart as BarChartIcon, Book, History, FileText } from "lucide-react";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, Bar, XAxis, YAxis, CartesianGrid } from '@/components/ui/chart';
-import { BarChart, Bar as RechartsBar } from 'recharts';
+import { PerformanceChart } from "./_components/performance-chart";
 
 const progressData = [
   { subject: "Mathematics", progress: 75, icon: <BarChartIcon className="h-6 w-6 text-blue-500" /> },
@@ -10,22 +9,6 @@ const progressData = [
   { subject: "Science", progress: 90, icon: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-green-500"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m10.4 16.2.5-1.7.5 1.7c.1.4.4.8.8.8.4 0 .7-.3.8-.8l.5-1.7.5 1.7c.1.4.4.8.8.8.4 0 .7-.3.8-.8l.5-1.7"></path><path d="m11.2 12.5.5-1.7.5 1.7c.1.4.4.8.8.8.4 0 .7-.3.8-.8l.5-1.7.5 1.7c.1.4.4.8.8.8.4 0 .7-.3.8-.8l.5-1.7"></path></svg> },
   { subject: "Literature", progress: 65, icon: <FileText className="h-6 w-6 text-purple-500" /> },
 ];
-
-const chartData = [
-  { month: 'January', score: 65 },
-  { month: 'February', score: 72 },
-  { month: 'March', score: 80 },
-  { month: 'April', score: 78 },
-  { month: 'May', score: 85 },
-  { month: 'June', score: 92 },
-];
-
-const chartConfig = {
-  score: {
-    label: "Quiz Score",
-    color: "hsl(var(--primary))",
-  },
-};
 
 export default function DashboardPage() {
   return (
@@ -69,24 +52,7 @@ export default function DashboardPage() {
             <CardDescription>Your average quiz scores over the last few months.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="h-[300px] w-full">
-              <BarChart data={chartData} accessibilityLayer>
-                <CartesianGrid vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => value.slice(0, 3)}
-                />
-                <YAxis domain={[50, 100]}/>
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent indicator="dot" />}
-                />
-                <RechartsBar dataKey="score" fill="var(--color-score)" radius={8} />
-              </BarChart>
-            </ChartContainer>
+            <PerformanceChart />
           </CardContent>
         </Card>
       </div>
