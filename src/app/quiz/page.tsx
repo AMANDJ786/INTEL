@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { generateQuiz, type GenerateQuizOutput } from '@/ai/flows/address-learning-challenges';
+import { saveQuizProgress } from '@/lib/progress';
+import { subjects } from '@/lib/data';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -48,7 +50,7 @@ export default function QuizPage() {
   async function onGenerateQuiz(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setQuiz(null);
-    resetQuizState();
+    resetQuizState(false);
     try {
       const response = await generateQuiz(values);
       setQuiz(response.quiz);
@@ -81,27 +83,44 @@ export default function QuizPage() {
     setCurrentQuestionIndex(prev => prev + 1);
   }
 
-  function resetQuizState() {
+  function resetQuizState(fullReset = true) {
     setQuiz(null);
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
     setSelectedAnswer(null);
     setIsAnswered(false);
     setScore(0);
-    form.reset();
+    if(fullReset) {
+      form.reset();
+    }
   }
   
   const isQuizFinished = quiz && currentQuestionIndex >= quiz.length;
 
   if (isQuizFinished) {
+    const finalScore = Math.round((score / quiz.length) * 100);
+    const chapter = form.getValues('topic');
+
+    // Find subject for the given chapter/topic
+    let subjectName = 'General';
+    for (const sub of subjects) {
+        if (sub.chapters.some(chap => chap.name === chapter)) {
+            subjectName = sub.name;
+            break;
+        }
+    }
+    saveQuizProgress(subjectName, chapter, finalScore);
+
+
     return (
         <div className="flex-1 p-4 md:p-8 pt-6 flex flex-col items-center justify-center text-center">
             <Trophy className="w-24 h-24 text-yellow-400 mb-4" />
             <h2 className="text-4xl font-bold tracking-tight mb-2">Quiz Complete!</h2>
             <p className="text-xl text-muted-foreground mb-6">
-                You scored {score} out of {quiz.length}.
+                You scored {score} out of {quiz.length}. ({finalScore}%)
             </p>
-            <Button onClick={resetQuizState}>Create Another Quiz</Button>
+            <p className="text-sm text-muted-foreground mb-6">Your progress has been saved.</p>
+            <Button onClick={() => resetQuizState(true)}>Create Another Quiz</Button>
         </div>
     )
   }
@@ -268,7 +287,7 @@ export default function QuizPage() {
                     </div>
                 </CardContent>
             </Card>
-             <Button variant="link" onClick={resetQuizState} className="mt-4 mx-auto block">Start Over</Button>
+             <Button variant="link" onClick={() => resetQuizState(true)} className="mt-4 mx-auto block">Start Over</Button>
         </div>
     </div>
   )

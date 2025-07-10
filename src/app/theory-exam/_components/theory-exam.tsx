@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { generateTheoryExam, gradeTheoryAnswers, type GenerateTheoryExamOutput, type GradeTheoryAnswersOutput } from '@/ai/flows/theory-exam-flow';
+import { generateTheoryExam, gradeTheoryAnswers, type GradeTheoryAnswersOutput } from '@/ai/flows/theory-exam-flow';
 import { useToast } from '@/hooks/use-toast';
+import { saveTheoryExamProgress } from '@/lib/progress';
+import { subjects } from '@/lib/data';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,7 +67,7 @@ export function TheoryExam() {
   };
 
   const handleGradeExam = async () => {
-    if (!selectedFile || !questions) return;
+    if (!selectedFile || !questions || !chapter) return;
 
     setIsUploading(true);
     setIsGrading(true);
@@ -78,6 +80,17 @@ export function TheoryExam() {
             const photoDataUri = reader.result as string;
             const response = await gradeTheoryAnswers({ photoDataUri, questions });
             setGradingResult(response);
+
+            // Find subject for the given chapter/topic
+            let subjectName = 'General';
+            for (const sub of subjects) {
+                if (sub.chapters.some(chap => chap.name === chapter)) {
+                    subjectName = sub.name;
+                    break;
+                }
+            }
+            saveTheoryExamProgress(subjectName, chapter, response.score);
+
         } catch (error) {
             console.error(error);
             toast({
@@ -144,7 +157,7 @@ export function TheoryExam() {
               <CardHeader className="text-center">
                   <Award className="mx-auto h-16 w-16 text-yellow-400" />
                   <CardTitle className="text-3xl">Exam Graded!</CardTitle>
-                  <CardDescription>Final Score: {gradingResult.score}/100</CardDescription>
+                  <CardDescription>Final Score: {gradingResult.score}/100. Your progress has been saved.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -206,7 +219,7 @@ export function TheoryExam() {
           {isGrading ? (
              <div className="space-y-2">
                 <p className="text-sm text-center font-medium">AI is grading your exam...</p>
-                <Progress value={undefined} className="w-full animate-pulse" />
+                <Progress value={50} className="w-full animate-pulse" />
             </div>
           ) : (
              <Button onClick={handleGradeExam} disabled={!selectedFile || isUploading} className="w-full">
