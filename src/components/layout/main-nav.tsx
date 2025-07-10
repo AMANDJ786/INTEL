@@ -7,7 +7,8 @@ import {
   HelpCircle,
   FileText,
   Sparkles,
-  BrainCircuit
+  BrainCircuit,
+  BookOpen
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -23,6 +24,7 @@ import {
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/subjects", label: "Subjects", icon: BookOpen },
   { href: "/ask", label: "Ask AI", icon: HelpCircle },
   { href: "/summarize", label: "Summarizer", icon: FileText },
   { href: "/quiz", label: "Quiz AI", icon: Sparkles },
