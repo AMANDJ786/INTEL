@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/subjects", label: "Subjects", icon: BookOpen },
   { href: "/ask", label: "Ask AI", icon: HelpCircle },
   { href: "/summarize", label: "Summarizer", icon: FileText },
@@ -36,7 +36,7 @@ export function MainNav() {
   return (
     <Sidebar className="border-r">
       <SidebarHeader>
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
             <BrainCircuit className="h-7 w-7 text-primary" />
             <h1 className="text-xl font-bold tracking-tighter text-primary">AICademy</h1>
         </Link>

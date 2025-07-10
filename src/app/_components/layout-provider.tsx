@@ -6,7 +6,7 @@ import { MainNav } from '@/components/layout/main-nav';
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/login';
+  const isLoginPage = pathname === '/';
 
   if (isLoginPage) {
     return <>{children}</>;

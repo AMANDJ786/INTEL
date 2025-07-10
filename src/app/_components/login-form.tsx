@@ -17,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -35,6 +36,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export function LoginForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,12 +46,9 @@ export function LoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // This is where you would handle form submission, e.g., call an API.
-    // For now, we'll just log the values.
     console.log('Login credentials:', values);
-    alert('Login successful! (Check console for details)');
-    // In a real app, you would redirect the user after a successful login.
-    // e.g., window.location.href = '/';
+    // On successful login, redirect to the dashboard.
+    router.push('/dashboard');
   }
 
   return (
