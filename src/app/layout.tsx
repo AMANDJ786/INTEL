@@ -15,7 +15,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // We can't use usePathname() here directly, so we need a client component wrapper
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -31,8 +30,8 @@ export default function RootLayout({
   );
 }
 
-// Create a client component to conditionally render the layout
 function LayoutProvider({ children }: { children: React.ReactNode }) {
+  "use client"
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
 
