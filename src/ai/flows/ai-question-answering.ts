@@ -13,7 +13,7 @@ import {z} from 'genkit';
 
 const AskQuestionInputSchema = z.object({
   question: z.string().describe('The question the student wants to ask about the course material.'),
-  courseMaterial: z.string().describe('The course material relevant to the question.'),
+  courseMaterial: z.string().describe('The course material or topic relevant to the question.'),
 });
 export type AskQuestionInput = z.infer<typeof AskQuestionInputSchema>;
 
@@ -30,9 +30,11 @@ const prompt = ai.definePrompt({
   name: 'askQuestionPrompt',
   input: {schema: AskQuestionInputSchema},
   output: {schema: AskQuestionOutputSchema},
-  prompt: `You are a teaching assistant. Answer the following question about the provided course material. If the answer is not explicitly present in the material, answer to the best of your knowledge.
+  prompt: `You are a friendly and helpful teaching assistant. Your goal is to explain concepts clearly and concisely to students.
 
-Course Material:
+If the user provides course material, base your answer on it. If they only provide a topic, explain the topic to the best of your knowledge.
+
+Course Material / Topic:
 {{courseMaterial}}
 
 Question: {{question}}`,

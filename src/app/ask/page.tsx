@@ -1,6 +1,7 @@
+import { Suspense } from 'react';
 import { AskQuestionForm } from './_components/ask-question-form';
 
-export default function AskQuestionPage() {
+function AskQuestionContent() {
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex flex-col space-y-2">
@@ -13,5 +14,14 @@ export default function AskQuestionPage() {
         <AskQuestionForm />
       </div>
     </div>
+  );
+}
+
+
+export default function AskQuestionPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AskQuestionContent />
+    </Suspense>
   );
 }

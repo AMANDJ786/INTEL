@@ -3,7 +3,7 @@ import { subjects } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, HelpCircle, Video, Radio } from 'lucide-react';
 
 export default function SubjectsPage() {
   return (
@@ -31,19 +31,39 @@ export default function SubjectsPage() {
                 <AccordionItem value="item-1">
                   <AccordionTrigger>View Chapters</AccordionTrigger>
                   <AccordionContent>
-                    <ul className="space-y-3 pt-2">
+                    <ul className="space-y-4 pt-2">
                       {subject.chapters.map((chapter) => (
                         <li
                           key={chapter.name}
-                          className="flex items-center justify-between rounded-md border p-3"
+                          className="flex flex-col items-start gap-4 rounded-md border p-4"
                         >
-                          <span className="font-medium">{chapter.name}</span>
-                          <Button asChild variant="ghost" size="sm">
-                            <Link href={`/quiz?topic=${encodeURIComponent(chapter.name)}`}>
-                              Start Quiz
-                              <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                          </Button>
+                          <span className="font-semibold text-lg">{chapter.name}</span>
+                          <div className="flex flex-wrap gap-2">
+                             <Button asChild variant="outline" size="sm">
+                              <Link href={`/ask?topic=${encodeURIComponent(chapter.name)}`}>
+                                <HelpCircle className="mr-2 h-4 w-4" />
+                                Explain with AI
+                              </Link>
+                            </Button>
+                             <Button asChild variant="outline" size="sm">
+                              <Link href="#">
+                                <Video className="mr-2 h-4 w-4" />
+                                Video Lecture
+                              </Link>
+                            </Button>
+                            <Button asChild variant="outline" size="sm">
+                              <Link href="#">
+                                <Radio className="mr-2 h-4 w-4" />
+                                Live Session
+                              </Link>
+                            </Button>
+                             <Button asChild variant="default" size="sm">
+                              <Link href={`/quiz?topic=${encodeURIComponent(chapter.name)}`}>
+                                Start Quiz
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
                         </li>
                       ))}
                     </ul>

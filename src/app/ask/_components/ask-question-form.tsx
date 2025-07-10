@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { askQuestion, type AskQuestionOutput } from '@/ai/flows/ai-question-answering';
+import { useSearchParams } from 'next/navigation';
+
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -16,7 +18,7 @@ import { Lightbulb } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
-  courseMaterial: z.string().min(50, 'Course material must be at least 50 characters long.'),
+  courseMaterial: z.string().min(3, 'Course material must be at least 3 characters long.'),
   question: z.string().min(10, 'Your question must be at least 10 characters long.'),
 });
 
@@ -24,6 +26,9 @@ export function AskQuestionForm() {
   const [result, setResult] = useState<AskQuestionOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const topic = searchParams.get('topic');
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,6 +37,21 @@ export function AskQuestionForm() {
       question: '',
     },
   });
+
+  useEffect(() => {
+    if (topic) {
+      form.setValue('courseMaterial', topic);
+      form.setValue('question', `Can you explain "${topic}" in simple terms?`);
+      
+      const values = {
+        courseMaterial: topic,
+        question: `Can you explain "${topic}" in simple terms?`
+      };
+      
+      // Automatically submit the form
+      onSubmit(values);
+    }
+  }, [topic, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -65,9 +85,9 @@ export function AskQuestionForm() {
                 name="courseMaterial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Course Material</FormLabel>
+                    <FormLabel>Topic or Course Material</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Paste the relevant text from your course here..." {...field} rows={10} />
+                      <Textarea placeholder="Paste the relevant text from your course here or enter a topic..." {...field} rows={10} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
