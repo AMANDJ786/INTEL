@@ -3,7 +3,7 @@ import { subjects } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, HelpCircle, Video, Radio } from 'lucide-react';
+import { ArrowRight, HelpCircle, Video, Radio, ClipboardCheck, Camera } from 'lucide-react';
 
 export default function SubjectsPage() {
   return (
@@ -59,8 +59,14 @@ export default function SubjectsPage() {
                             </Button>
                              <Button asChild variant="default" size="sm">
                               <Link href={`/quiz?topic=${encodeURIComponent(chapter.name)}`}>
-                                Start Quiz
-                                <ArrowRight className="ml-2 h-4 w-4" />
+                                <ClipboardCheck className="mr-2 h-4 w-4" />
+                                MCQ Exam
+                              </Link>
+                            </Button>
+                             <Button asChild variant="secondary" size="sm">
+                              <Link href={`/theory-exam?chapter=${encodeURIComponent(chapter.name)}`}>
+                                <Camera className="mr-2 h-4 w-4" />
+                                Short Theory Exam
                               </Link>
                             </Button>
                           </div>
