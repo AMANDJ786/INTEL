@@ -17,7 +17,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CheckCircle, XCircle, Trophy, Sparkles } from 'lucide-react';
+import { CheckCircle, XCircle, Trophy, Sparkles, Lightbulb } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   topic: z.string().min(3, 'Topic must be at least 3 characters long.'),
@@ -31,9 +32,9 @@ export default function QuizPage() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<string[]>([]);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [userAnswer, setUserAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
 
   const { toast } = useToast();
@@ -67,31 +68,37 @@ export default function QuizPage() {
   }
 
   function handleAnswerSubmit() {
-    if (!selectedAnswer || !quiz) return;
+    if (!userAnswer || !quiz) return;
     const correctAnswer = quiz[currentQuestionIndex].answer;
-    const isCorrect = selectedAnswer === correctAnswer;
-    if (isCorrect) {
+    const correct = userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+    
+    setIsCorrect(correct);
+    if (correct) {
       setScore(s => s + 1);
     }
-    setUserAnswers(prev => [...prev, selectedAnswer]);
     setIsAnswered(true);
   }
 
   function handleNextQuestion() {
     setIsAnswered(false);
-    setSelectedAnswer(null);
+    setIsCorrect(null);
+    setUserAnswer('');
     setCurrentQuestionIndex(prev => prev + 1);
   }
 
   function resetQuizState(fullReset = true) {
     setQuiz(null);
     setCurrentQuestionIndex(0);
-    setUserAnswers([]);
-    setSelectedAnswer(null);
+    setUserAnswer('');
     setIsAnswered(false);
+    setIsCorrect(null);
     setScore(0);
     if(fullReset) {
-      form.reset();
+      form.reset({
+          topic: '',
+          numberOfQuestions: 5,
+          difficulty: 'medium',
+      });
     }
   }
   
@@ -101,7 +108,6 @@ export default function QuizPage() {
     const finalScore = Math.round((score / quiz.length) * 100);
     const chapter = form.getValues('topic');
 
-    // Find subject for the given chapter/topic
     let subjectName = 'General';
     for (const sub of subjects) {
         if (sub.chapters.some(chap => chap.name === chapter)) {
@@ -110,7 +116,6 @@ export default function QuizPage() {
         }
     }
     saveQuizProgress(subjectName, chapter, finalScore);
-
 
     return (
         <div className="flex-1 p-4 md:p-8 pt-6 flex flex-col items-center justify-center text-center">
@@ -125,17 +130,14 @@ export default function QuizPage() {
     )
   }
 
-
   if (isLoading) {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <h2 className="text-3xl font-bold tracking-tight">Generating Your Quiz...</h2>
-        <p className="text-muted-foreground">The AI is crafting questions for you. Please wait.</p>
+        <h2 className="text-3xl font-bold tracking-tight">Crafting Your Challenge...</h2>
+        <p className="text-muted-foreground">The AI is creating unique fill-in-the-blank questions for you. Please wait.</p>
         <Card>
             <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
             <CardContent className="space-y-4">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
             </CardContent>
@@ -150,7 +152,7 @@ export default function QuizPage() {
         <div className="flex flex-col space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">AI Quiz Generator</h2>
           <p className="text-muted-foreground max-w-2xl">
-            Challenge yourself! Create a custom quiz on any topic to test your knowledge and retention.
+            Challenge yourself with unique **fill-in-the-blank** questions to test your knowledge and retention.
           </p>
         </div>
         <Card className="max-w-2xl mx-auto mt-6">
@@ -235,6 +237,7 @@ export default function QuizPage() {
   }
 
   const currentQuestion = quiz[currentQuestionIndex];
+  const questionText = currentQuestion.question.replace('[BLANK]', '______');
 
   return (
     <div className="flex-1 p-4 md:p-8 pt-6">
@@ -244,45 +247,40 @@ export default function QuizPage() {
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>{currentQuestion.question}</CardTitle>
+                    <CardTitle className="text-2xl leading-snug">{questionText}</CardTitle>
+                    <CardDescription>Fill in the blank with the correct term.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <RadioGroup
-                        value={selectedAnswer ?? undefined}
-                        onValueChange={setSelectedAnswer}
-                        disabled={isAnswered}
-                        className="space-y-4"
-                    >
-                        {currentQuestion.options.map((option, index) => {
-                            const isCorrect = option === currentQuestion.answer;
-                            const isSelected = option === selectedAnswer;
-                            return (
-                                <FormItem key={index}
-                                    className={cn("flex items-center space-x-3 space-y-0 p-4 border rounded-md transition-colors",
-                                        isAnswered && isCorrect && "bg-accent/20 border-accent/50",
-                                        isAnswered && isSelected && !isCorrect && "bg-destructive/20 border-destructive/50",
-                                        !isAnswered && "hover:bg-accent/10"
-                                    )}
-                                >
-                                    <FormControl>
-                                        <RadioGroupItem value={option} />
-                                    </FormControl>
-                                    <FormLabel className="font-normal w-full cursor-pointer flex justify-between items-center">
-                                        {option}
-                                        {isAnswered && isCorrect && <CheckCircle className="text-accent-foreground" />}
-                                        {isAnswered && isSelected && !isCorrect && <XCircle className="text-destructive-foreground" />}
-                                    </FormLabel>
-                                </FormItem>
-                            )
-                        })}
-                    </RadioGroup>
+                    <div className="space-y-4">
+                        <Input
+                            id="user-answer"
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder="Type your answer here..."
+                            disabled={isAnswered}
+                            className="text-lg h-12"
+                        />
+                        
+                        {isAnswered && (
+                            <Alert variant={isCorrect ? 'default' : 'destructive'} className={cn(isCorrect ? 'border-green-500/50 bg-green-500/10' : '')}>
+                                {isCorrect ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                <AlertTitle>{isCorrect ? 'Correct!' : 'Incorrect'}</AlertTitle>
+                                {!isCorrect && (
+                                <AlertDescription>
+                                    The correct answer is: **{quiz[currentQuestionIndex].answer}**
+                                </AlertDescription>
+                                )}
+                            </Alert>
+                        )}
+
+                    </div>
                     <div className="mt-6 flex justify-end">
                         {isAnswered ? (
                              <Button onClick={handleNextQuestion}>
                                 {currentQuestionIndex === quiz.length - 1 ? 'Finish Quiz' : 'Next Question'}
                             </Button>
                         ) : (
-                            <Button onClick={handleAnswerSubmit} disabled={!selectedAnswer}>Submit Answer</Button>
+                            <Button onClick={handleAnswerSubmit} disabled={!userAnswer}>Submit Answer</Button>
                         )}
                     </div>
                 </CardContent>

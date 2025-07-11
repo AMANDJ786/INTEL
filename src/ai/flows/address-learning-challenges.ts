@@ -21,11 +21,10 @@ export type GenerateQuizInput = z.infer<typeof GenerateQuizInputSchema>;
 const GenerateQuizOutputSchema = z.object({
   quiz: z.array(
     z.object({
-      question: z.string().describe('The quiz question.'),
-      options: z.array(z.string()).describe('The possible answers to the question.'),
-      answer: z.string().describe('The correct answer to the question.'),
+      question: z.string().describe('The quiz question, formatted as a sentence with "[BLANK]" as a placeholder for the answer.'),
+      answer: z.string().describe('The correct word or phrase that fits in the [BLANK].'),
     })
-  ).describe('The generated quiz questions and answers.'),
+  ).describe('The generated fill-in-the-blank quiz questions and answers.'),
 });
 export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
 
@@ -37,21 +36,19 @@ const generateQuizPrompt = ai.definePrompt({
   name: 'generateQuizPrompt',
   input: {schema: GenerateQuizInputSchema},
   output: {schema: GenerateQuizOutputSchema},
-  prompt: `You are an expert educator creating quizzes for students.
+  prompt: `You are an expert educator creating challenging "fill-in-the-blank" quizzes for students.
 
-  Generate a quiz with {{numberOfQuestions}} questions on the topic of {{topic}} with a difficulty of {{difficulty}}.  Each question should have 4 possible answers, one of which is correct.  Return a JSON object with the following format:
+  Generate a quiz with {{numberOfQuestions}} questions on the topic of {{topic}} with a difficulty of {{difficulty}}.  
+  
+  Each question must be a single sentence with a key term or concept replaced by the placeholder "[BLANK]".
+  The "answer" should be the word or short phrase that correctly fills the blank.
 
+  Return a JSON object with the following format:
   {
     "quiz": [
       {
-        "question": "Question 1",
-        "options": [
-          "Option 1",
-          "Option 2",
-          "Option 3",
-          "Option 4"
-        ],
-        "answer": "The correct answer"
+        "question": "The powerhouse of the cell is the [BLANK].",
+        "answer": "mitochondria"
       }
     ]
   }`,
